@@ -45,7 +45,17 @@ namespace AramDashboard
             ChampionNames = new Dictionary<int, string>();
             ByChampion = new Dictionary<int, List<AugmentRow>>();
             TopAugments = new List<AugmentRow>();
-            Load();
+            try
+            {
+                Load();
+            }
+            catch (Exception ex)
+            {
+                try { File.AppendAllText(Path.Combine(baseDir, "startup-error.log"), DateTime.Now + " data: " + ex + Environment.NewLine); } catch { }
+                Champions.Clear();
+                ByChampion.Clear();
+                TopAugments.Clear();
+            }
         }
 
         public void Load()
