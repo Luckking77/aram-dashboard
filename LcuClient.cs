@@ -60,6 +60,7 @@ namespace AramDashboard
 
     public static class LcuClient
     {
+        public static Dictionary<int, string> ChampionNames = new Dictionary<int, string>();
         public static readonly string[] Lockfiles = new string[]
         {
             @"C:\Program Files (x86)\Tencent\LoL\LOL(26)\LeagueClient\lockfile",
@@ -138,7 +139,10 @@ namespace AramDashboard
                         int duration;
                         row.Duration = game.ContainsKey("gameDuration") && int.TryParse(Convert.ToString(game["gameDuration"]), out duration)
                             ? (duration / 60).ToString() + " 分钟" : "--";
-                        row.Champion = "英雄 " + (participant.ContainsKey("championId") ? Convert.ToString(participant["championId"]) : "?");
+                        int championId = participant.ContainsKey("championId") ? Convert.ToInt32(participant["championId"]) : 0;
+                        string championName;
+                        row.Champion = championId > 0 && ChampionNames.TryGetValue(championId, out championName)
+                            ? championName : ("英雄 " + championId);
                         row.Queue = game.ContainsKey("queueId") && Convert.ToString(game["queueId"]) == "2400" ? "海克斯大乱斗" : "其他模式";
                         Dictionary<string, object> stats = participant.ContainsKey("stats") ? participant["stats"] as Dictionary<string, object> : null;
                         if (stats != null)

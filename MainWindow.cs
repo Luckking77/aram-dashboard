@@ -253,6 +253,7 @@ namespace AramDashboard
 
             Action load = delegate
             {
+                LcuClient.ChampionNames = _store.ChampionNames;
                 status.Text = "正在读取 LCU…";
                 Task.Run(async delegate
                 {

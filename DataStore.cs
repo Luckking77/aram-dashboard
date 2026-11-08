@@ -34,6 +34,7 @@ namespace AramDashboard
         public int ChampionCount { get; private set; }
         public int AugmentCount { get; private set; }
         public List<ChampionRow> Champions { get; private set; }
+        public Dictionary<int, string> ChampionNames { get; private set; }
         public Dictionary<int, List<AugmentRow>> ByChampion { get; private set; }
         public List<AugmentRow> TopAugments { get; private set; }
 
@@ -41,6 +42,7 @@ namespace AramDashboard
         {
             DataDir = Path.Combine(baseDir, "data");
             Champions = new List<ChampionRow>();
+            ChampionNames = new Dictionary<int, string>();
             ByChampion = new Dictionary<int, List<AugmentRow>>();
             TopAugments = new List<AugmentRow>();
             Load();
@@ -64,6 +66,7 @@ namespace AramDashboard
                         if (row == null) continue;
                         int id = Convert.ToInt32(row["id"]);
                         names[id] = Convert.ToString(row["name"]);
+                        ChampionNames[id] = names[id];
                     }
                 }
             }
