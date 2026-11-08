@@ -13,6 +13,7 @@ namespace AramDashboard
         private readonly ContentControl _content;
         private readonly TextBlock _title;
         private readonly TextBlock _subtitle;
+        private readonly TextBlock _statusText;
         private readonly DataStore _store;
 
         public MainWindow()
@@ -32,9 +33,11 @@ namespace AramDashboard
             Grid root = new Grid();
             root.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(220) });
             root.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(34) });
 
             Border sidebar = new Border();
-            sidebar.Background = Theme.Brush(Color.FromRgb(10, 14, 21));
+            sidebar.Background = Theme.Brush(Color.FromRgb(250, 248, 243));
             sidebar.BorderBrush = Theme.Brush(Theme.Border);
             sidebar.BorderThickness = new Thickness(0, 0, 1, 0);
             sidebar.Padding = new Thickness(18, 22, 18, 18);
@@ -70,6 +73,22 @@ namespace AramDashboard
             Grid.SetColumn(sidebar, 0);
             root.Children.Add(sidebar);
 
+            Border statusBar = new Border();
+            statusBar.Background = Theme.Brush(Color.FromRgb(250, 248, 243));
+            statusBar.BorderBrush = Theme.Brush(Theme.Border);
+            statusBar.BorderThickness = new Thickness(0, 1, 0, 0);
+            statusBar.Padding = new Thickness(16, 0, 16, 0);
+            Grid.SetRow(statusBar, 1);
+            Grid.SetColumnSpan(statusBar, 2);
+            root.Children.Add(statusBar);
+
+            _statusText = new TextBlock();
+            _statusText.VerticalAlignment = VerticalAlignment.Center;
+            _statusText.FontSize = 11;
+            _statusText.Foreground = Theme.Brush(Theme.Muted);
+            _statusText.Text = "ARAM Dashboard v0.1 · 客户端 未连接 · 数据 " + (_store.DataDate ?? "--");
+            statusBar.Child = _statusText;
+
             Border main = new Border();
             main.Padding = new Thickness(34, 28, 34, 28);
             ScrollViewer scroll = new ScrollViewer();
@@ -99,6 +118,14 @@ namespace AramDashboard
 
             Content = root;
             ShowPage("推荐");
+        }
+
+        private void SetStatus(string text)
+        {
+            if (_statusText != null)
+            {
+                _statusText.Text = text;
+            }
         }
 
         private Button Nav(string text, string page)
@@ -236,7 +263,7 @@ namespace AramDashboard
             grid.Foreground = Theme.Brush(Theme.Text);
             grid.BorderThickness = new Thickness(0);
             grid.RowBackground = Theme.Brush(Theme.Panel);
-            grid.AlternatingRowBackground = Theme.Brush(Color.FromRgb(24, 33, 47));
+            grid.AlternatingRowBackground = Theme.Brush(Color.FromRgb(248, 245, 238));
             grid.Columns.Add(TextColumn("时间", "Time", 120));
             grid.Columns.Add(TextColumn("英雄", "Champion", 180));
             grid.Columns.Add(TextColumn("结果", "Result", 80));
@@ -262,8 +289,10 @@ namespace AramDashboard
                     {
                         grid.ItemsSource = rows;
                         status.Text = rows.Count == 0
-                            ? "未读到战绩：请确认客户端已启动并已登录。"
+                            ? "未读到战绩：" + (LcuClient.LastError ?? "请确认客户端已启动并已登录。")
                             : "最近 " + rows.Count + " 场";
+                        SetStatus("ARAM Dashboard v0.1 · 客户端 " + (rows.Count > 0 ? "已连接" : "未连接") +
+                            " · 数据 " + (_store.DataDate ?? "--"));
                     }));
                 });
             };
@@ -335,7 +364,7 @@ namespace AramDashboard
             grid.Foreground = Theme.Brush(Theme.Text);
             grid.BorderThickness = new Thickness(0);
             grid.RowBackground = Theme.Brush(Theme.Panel);
-            grid.AlternatingRowBackground = Theme.Brush(Color.FromRgb(24, 33, 47));
+            grid.AlternatingRowBackground = Theme.Brush(Color.FromRgb(248, 245, 238));
             grid.HorizontalGridLinesBrush = Theme.Brush(Theme.Border);
             return grid;
         }
@@ -355,3 +384,4 @@ namespace AramDashboard
         }
     }
 }
+

@@ -46,6 +46,51 @@ namespace AramDashboard
                 CloseHandle(process);
             }
         }
+
+        public delegate bool EnumWindowsProc(IntPtr hwnd, IntPtr lparam);
+        [DllImport("user32.dll")]
+        public static extern bool EnumWindows(EnumWindowsProc callback, IntPtr lparam);
+        [DllImport("user32.dll")]
+        public static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint pid);
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        public static extern int GetClassName(IntPtr hwnd, StringBuilder text, int max);
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        public static extern int GetWindowText(IntPtr hwnd, StringBuilder text, int max);
+        [DllImport("user32.dll")]
+        public static extern bool IsWindowVisible(IntPtr hwnd);
+
+        public static uint FindClientPid()
+        {
+            uint found = 0;
+            EnumWindows(delegate(IntPtr hwnd, IntPtr lparam)
+            {
+                if (!IsWindowVisible(hwnd)) return true;
+                StringBuilder cls = new StringBuilder(128);
+                GetClassName(hwnd, cls, cls.Capacity);
+                if (cls.ToString() != "RCLIENT" && cls.ToString() != "Chrome_WidgetWin_0")
+                {
+                    return true;
+                }
+                StringBuilder title = new StringBuilder(256);
+                GetWindowText(hwnd, title, title.Capacity);
+                string t = title.ToString();
+                if (cls.ToString() == "Chrome_WidgetWin_0" &&
+                    t.IndexOf("League", StringComparison.OrdinalIgnoreCase) < 0 &&
+                    t.IndexOf("英雄联盟", StringComparison.Ordinal) < 0)
+                {
+                    return true;
+                }
+                uint pid;
+                GetWindowThreadProcessId(hwnd, out pid);
+                if (pid != 0)
+                {
+                    found = pid;
+                    return false;
+                }
+                return true;
+            }, IntPtr.Zero);
+            return found;
+        }
     }
 
     public class MatchRow
@@ -61,6 +106,7 @@ namespace AramDashboard
     public static class LcuClient
     {
         public static Dictionary<int, string> ChampionNames = new Dictionary<int, string>();
+        public static string LastError;
         public static readonly string[] Lockfiles = new string[]
         {
             @"C:\Program Files (x86)\Tencent\LoL\LOL(26)\LeagueClient\lockfile",
@@ -73,10 +119,12 @@ namespace AramDashboard
         public static async Task<List<MatchRow>> GetRecentMatchesAsync(int count)
         {
             List<MatchRow> rows = new List<MatchRow>();
+            LastError = null;
             int port;
             string token;
             if (!TryCredentials(out port, out token))
             {
+                LastError = "未找到 LCU 端口/token";
                 return rows;
             }
             try
@@ -164,6 +212,7 @@ namespace AramDashboard
             }
             catch
             {
+                LastError = "LCU 请求失败";
             }
             return rows;
         }
@@ -224,23 +273,34 @@ namespace AramDashboard
 
             try
             {
-                Process[] processes = Process.GetProcessesByName("LeagueClientUx");
-                if (processes.Length == 0) return false;
-                string command = Native.ReadProcessCommandLine((uint)processes[0].Id);
-                if (string.IsNullOrEmpty(command)) return false;
-                System.Text.RegularExpressions.Match pm =
-                    System.Text.RegularExpressions.Regex.Match(command, "--app-port=(\\d+)");
-                System.Text.RegularExpressions.Match tm =
-                    System.Text.RegularExpressions.Regex.Match(command, "--remoting-auth-token=([^\\s\"]+)");
-                if (!pm.Success || !tm.Success) return false;
-                if (!int.TryParse(pm.Groups[1].Value, out port)) return false;
-                token = tm.Groups[1].Value;
-                return true;
+                uint pid = Native.FindClientPid();
+                if (pid == 0)
+                {
+                    Process[] processes = Process.GetProcessesByName("LeagueClientUx");
+                    if (processes.Length > 0) pid = (uint)processes[0].Id;
+                }
+                string command = pid != 0 ? Native.ReadProcessCommandLine(pid) : null;
+                if (ParseCommandLine(command, out port, out token)) return true;
             }
             catch
             {
-                return false;
             }
+            return false;
+        }
+
+        private static bool ParseCommandLine(string command, out int port, out string token)
+        {
+            port = 0;
+            token = null;
+            if (string.IsNullOrEmpty(command)) return false;
+            System.Text.RegularExpressions.Match pm =
+                System.Text.RegularExpressions.Regex.Match(command, "--app-port=(\\d+)");
+            System.Text.RegularExpressions.Match tm =
+                System.Text.RegularExpressions.Regex.Match(command, "--remoting-auth-token=([^\\s\"]+)");
+            if (!pm.Success || !tm.Success) return false;
+            if (!int.TryParse(pm.Groups[1].Value, out port)) return false;
+            token = tm.Groups[1].Value;
+            return true;
         }
     }
 }

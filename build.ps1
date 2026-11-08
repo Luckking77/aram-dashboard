@@ -20,3 +20,5 @@ foreach ($src in $sources) { $args += $src }
 & $csc @args
 if ($LASTEXITCODE -ne 0) { throw "csc failed: $LASTEXITCODE" }
 Write-Host "Built: $out"
+
+

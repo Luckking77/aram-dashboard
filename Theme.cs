@@ -7,14 +7,14 @@ namespace AramDashboard
 {
     public class Theme
     {
-        public static readonly Color Background = Color.FromRgb(13, 18, 27);
-        public static readonly Color Panel = Color.FromRgb(20, 28, 40);
-        public static readonly Color PanelHover = Color.FromRgb(30, 41, 57);
-        public static readonly Color Border = Color.FromRgb(54, 64, 82);
-        public static readonly Color Text = Color.FromRgb(232, 237, 245);
-        public static readonly Color Muted = Color.FromRgb(146, 158, 176);
-        public static readonly Color Gold = Color.FromRgb(232, 184, 92);
-        public static readonly Color Green = Color.FromRgb(120, 224, 160);
+        public static readonly Color Background = Color.FromRgb(245, 243, 238);
+        public static readonly Color Panel = Color.FromRgb(255, 255, 255);
+        public static readonly Color PanelHover = Color.FromRgb(250, 246, 238);
+        public static readonly Color Border = Color.FromRgb(224, 218, 207);
+        public static readonly Color Text = Color.FromRgb(43, 38, 32);
+        public static readonly Color Muted = Color.FromRgb(122, 113, 102);
+        public static readonly Color Gold = Color.FromRgb(184, 132, 38);
+        public static readonly Color Green = Color.FromRgb(66, 132, 82);
 
         public static SolidColorBrush Brush(Color color)
         {
@@ -44,16 +44,16 @@ namespace AramDashboard
             string xaml =
                 "<ControlTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' " +
                 "xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' TargetType='{x:Type Button}'>" +
-                "<Border x:Name='b' Background='#14202C' BorderBrush='#364052' BorderThickness='1' CornerRadius='8' Padding='16,0'>" +
+                "<Border x:Name='b' Background='#FFFFFF' BorderBrush='#E0DACF' BorderThickness='1' CornerRadius='7' Padding='16,0'>" +
                 "<ContentPresenter VerticalAlignment='Center' HorizontalAlignment='Left'/>" +
                 "</Border>" +
                 "<ControlTemplate.Triggers>" +
                 "<Trigger Property='IsMouseOver' Value='True'>" +
-                "<Setter TargetName='b' Property='Background' Value='#1E2939'/>" +
-                "<Setter TargetName='b' Property='BorderBrush' Value='#E8B85C'/>" +
+                "<Setter TargetName='b' Property='Background' Value='#FAF6EE'/>" +
+                "<Setter TargetName='b' Property='BorderBrush' Value='#B88426'/>" +
                 "</Trigger>" +
                 "<Trigger Property='IsPressed' Value='True'>" +
-                "<Setter TargetName='b' Property='Background' Value='#0D141E'/>" +
+                "<Setter TargetName='b' Property='Background' Value='#F1E8D8'/>" +
                 "</Trigger>" +
                 "</ControlTemplate.Triggers>" +
                 "</ControlTemplate>";
