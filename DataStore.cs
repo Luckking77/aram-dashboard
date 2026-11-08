@@ -10,6 +10,8 @@ namespace AramDashboard
         public int Id { get; set; }
         public string Name { get; set; }
         public string Title { get; set; }
+        public string Alias { get; set; }
+        public string IconUrl { get; set; }
         public int Rank { get; set; }
         public double WinRate { get; set; }
         public double PickRate { get; set; }
@@ -20,6 +22,7 @@ namespace AramDashboard
         public int Id { get; set; }
         public string Name { get; set; }
         public string Rarity { get; set; }
+        public string IconUrl { get; set; }
         public int Score { get; set; }
         public string Rating { get; set; }
         public double WinRate { get; set; }
@@ -64,6 +67,7 @@ namespace AramDashboard
             serializer.MaxJsonLength = int.MaxValue;
 
             Dictionary<int, string> names = new Dictionary<int, string>();
+            Dictionary<int, string> aliases = new Dictionary<int, string>();
             string championPath = Path.Combine(DataDir, "champions.json");
             if (File.Exists(championPath))
             {
@@ -76,6 +80,7 @@ namespace AramDashboard
                         if (row == null) continue;
                         int id = Convert.ToInt32(row["id"]);
                         names[id] = Convert.ToString(row["name"]);
+                        aliases[id] = Convert.ToString(row["alias"]);
                         ChampionNames[id] = names[id];
                     }
                 }
@@ -98,6 +103,9 @@ namespace AramDashboard
                             ChampionRow item = new ChampionRow();
                             item.Id = Convert.ToInt32(row["championId"]);
                             item.Name = names.ContainsKey(item.Id) ? names[item.Id] : ("英雄 " + item.Id);
+                            item.Alias = aliases.ContainsKey(item.Id) ? aliases[item.Id] : "";
+                            item.IconUrl = string.IsNullOrEmpty(item.Alias) ? "" :
+                                "https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/" + item.Alias + ".png";
                             item.Rank = Convert.ToInt32(row["rank"]);
                             item.WinRate = Convert.ToDouble(row["winRate"]);
                             item.PickRate = Convert.ToDouble(row["pickRate"]);
@@ -132,6 +140,7 @@ namespace AramDashboard
                                 item.Id = Convert.ToInt32(row["augmentId"]);
                                 item.Name = Convert.ToString(row["name"]);
                                 item.Rarity = Convert.ToString(row["rarity"]);
+                                item.IconUrl = row.ContainsKey("iconUrl") ? Convert.ToString(row["iconUrl"]) : "";
                                 item.Score = Convert.ToInt32(row["score"]);
                                 item.Rating = Convert.ToString(row["rating"]);
                                 item.WinRate = row.ContainsKey("resgWinRate") && row["resgWinRate"] != null

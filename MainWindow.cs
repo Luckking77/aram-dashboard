@@ -173,13 +173,78 @@ namespace AramDashboard
             return panel;
         }
 
+        private UIElement HeaderStats()
+        {
+            Border panel = new Border();
+            panel.Background = Theme.Brush(Color.FromRgb(250, 247, 240));
+            panel.BorderBrush = Theme.Brush(Theme.Border);
+            panel.BorderThickness = new Thickness(1);
+            panel.CornerRadius = new CornerRadius(10);
+            panel.Padding = new Thickness(22, 18, 22, 18);
+            panel.Margin = new Thickness(0, 0, 0, 4);
+
+            StackPanel row = new StackPanel();
+            row.Orientation = Orientation.Horizontal;
+
+            ChampionRow top = _store.Champions.Count > 0 ? _store.Champions[0] : null;
+            StackPanel left = new StackPanel();
+            left.Width = 310;
+            TextBlock label = new TextBlock();
+            label.Text = "本期第一";
+            label.FontSize = 11;
+            label.Foreground = Theme.Brush(Theme.Muted);
+            left.Children.Add(label);
+            TextBlock name = new TextBlock();
+            name.Text = top == null ? "暂无数据" : top.Name;
+            name.FontSize = 22;
+            name.FontWeight = FontWeights.SemiBold;
+            name.Margin = new Thickness(0, 2, 0, 0);
+            name.Foreground = Theme.Brush(Theme.Text);
+            left.Children.Add(name);
+            TextBlock win = new TextBlock();
+            win.Text = top == null ? "--" : (top.WinRate * 100).ToString("0.0") + "%";
+            win.FontSize = 36;
+            win.FontWeight = FontWeights.Bold;
+            win.Foreground = Theme.Brush(Theme.Gold);
+            left.Children.Add(win);
+            row.Children.Add(left);
+
+            row.Children.Add(Metric("收录英雄", _store.ChampionCount.ToString()));
+            row.Children.Add(Metric("收录海克斯", _store.AugmentCount.ToString()));
+            row.Children.Add(Metric("数据版本", _store.DataDate ?? "--"));
+            row.Children.Add(Metric("账号登录", "无"));
+            panel.Child = row;
+            return panel;
+        }
+
+        private static UIElement Metric(string label, string value)
+        {
+            StackPanel stack = new StackPanel();
+            stack.Width = 150;
+            stack.Margin = new Thickness(0, 8, 0, 0);
+            TextBlock valueBlock = new TextBlock();
+            valueBlock.Text = value;
+            valueBlock.FontSize = 20;
+            valueBlock.FontWeight = FontWeights.SemiBold;
+            valueBlock.Foreground = Theme.Brush(Theme.Text);
+            stack.Children.Add(valueBlock);
+            TextBlock labelBlock = new TextBlock();
+            labelBlock.Text = label;
+            labelBlock.FontSize = 11;
+            labelBlock.Margin = new Thickness(0, 4, 0, 0);
+            labelBlock.Foreground = Theme.Brush(Theme.Muted);
+            stack.Children.Add(labelBlock);
+            return stack;
+        }
+
         private UIElement BuildRecommendPage()
         {
             StackPanel stack = new StackPanel();
+            stack.Children.Add(HeaderStats());
             TextBlock intro = new TextBlock();
             intro.Text = "全局海克斯强度（按适配分排序）";
             intro.FontSize = 14;
-            intro.Margin = new Thickness(0, 0, 0, 10);
+            intro.Margin = new Thickness(0, 12, 0, 10);
             intro.Foreground = Theme.Brush(Theme.Gold);
             stack.Children.Add(intro);
 
@@ -198,10 +263,11 @@ namespace AramDashboard
         private UIElement BuildDataPage()
         {
             StackPanel stack = new StackPanel();
+            stack.Children.Add(HeaderStats());
             TextBlock intro = new TextBlock();
             intro.Text = "英雄胜率 · 数据日期 " + (_store.DataDate ?? "--");
             intro.FontSize = 14;
-            intro.Margin = new Thickness(0, 0, 0, 10);
+            intro.Margin = new Thickness(0, 12, 0, 10);
             intro.Foreground = Theme.Brush(Theme.Gold);
             stack.Children.Add(intro);
 
