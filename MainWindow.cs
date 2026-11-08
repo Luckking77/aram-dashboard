@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -220,13 +221,53 @@ namespace AramDashboard
             text.Foreground = Theme.Brush(Theme.Gold);
             stack.Children.Add(text);
 
-            TextBlock detail = new TextBlock();
-            detail.Text = "LCU 战绩接入中。\n\n这里将显示最近对局、队友/对手、英雄、海克斯和装备。";
-            detail.FontSize = 13;
-            detail.LineHeight = 23;
-            detail.Margin = new Thickness(0, 10, 0, 0);
-            detail.Foreground = Theme.Brush(Theme.Muted);
-            stack.Children.Add(detail);
+            TextBlock status = new TextBlock();
+            status.Text = "正在读取 LCU…";
+            status.FontSize = 12;
+            status.Margin = new Thickness(0, 6, 0, 10);
+            status.Foreground = Theme.Brush(Theme.Muted);
+            stack.Children.Add(status);
+
+            DataGrid grid = new DataGrid();
+            grid.Height = 480;
+            grid.AutoGenerateColumns = false;
+            grid.IsReadOnly = true;
+            grid.Background = Theme.Brush(Theme.Panel);
+            grid.Foreground = Theme.Brush(Theme.Text);
+            grid.BorderThickness = new Thickness(0);
+            grid.RowBackground = Theme.Brush(Theme.Panel);
+            grid.AlternatingRowBackground = Theme.Brush(Color.FromRgb(24, 33, 47));
+            grid.Columns.Add(TextColumn("时间", "Time", 120));
+            grid.Columns.Add(TextColumn("英雄", "Champion", 180));
+            grid.Columns.Add(TextColumn("结果", "Result", 80));
+            grid.Columns.Add(TextColumn("KDA", "Kda", 120));
+            grid.Columns.Add(TextColumn("模式", "Queue", 120));
+            grid.Columns.Add(TextColumn("时长", "Duration", 100));
+            stack.Children.Add(grid);
+
+            Button refresh = Theme.NavButton("刷新战绩");
+            refresh.Width = 160;
+            refresh.HorizontalAlignment = HorizontalAlignment.Left;
+            refresh.Margin = new Thickness(0, 10, 0, 0);
+            stack.Children.Add(refresh);
+
+            Action load = delegate
+            {
+                status.Text = "正在读取 LCU…";
+                Task.Run(async delegate
+                {
+                    List<MatchRow> rows = await LcuClient.GetRecentMatchesAsync(10);
+                    Dispatcher.BeginInvoke(new Action(delegate
+                    {
+                        grid.ItemsSource = rows;
+                        status.Text = rows.Count == 0
+                            ? "未读到战绩：请确认客户端已启动并已登录。"
+                            : "最近 " + rows.Count + " 场";
+                    }));
+                });
+            };
+            refresh.Click += delegate { load(); };
+            load();
             return Panel(stack);
         }
 

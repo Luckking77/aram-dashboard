@@ -8,6 +8,7 @@ $refs = @(
     (Join-Path $fw 'System.Core.dll'),
     (Join-Path $fw 'System.Xaml.dll'),
     (Join-Path $fw 'System.Web.Extensions.dll'),
+    (Join-Path $fw 'System.Net.Http.dll'),
     (Join-Path $wpf 'PresentationFramework.dll'),
     (Join-Path $wpf 'PresentationCore.dll'),
     (Join-Path $wpf 'WindowsBase.dll')
